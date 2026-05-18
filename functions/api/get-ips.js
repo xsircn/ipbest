@@ -3,12 +3,12 @@ export async function onRequest(context) {
   const { env, request } = context;
 
   // 1. 检查环境变量中是否绑定了 KV 数据库
-  if (!env.CF_IP_POOL) {
-    return new Response("错误：未绑定 KV 数据库命名空间 CF_IP_POOL", { status: 500 });
-  }
+if (!env.IP_POOL) {
+  return new Response("错误：未绑定 KV 数据库命名空间 IP_POOL", { status: 500 });
+}
 
   // 2. 尝试从 KV 数据库读取上一次筛选出的活 IP
-  let cachedIps = await env.CF_IP_POOL.get("VALID_IPS");
+ let cachedIps = await env.IP_POOL.get("VALID_IPS");
 
   // 3. 触发异步“后台清洗任务”，让系统在后台去探测，不阻塞当前用户的下载请求
   context.waitUntil(triggerInboundCheck(env));
@@ -65,8 +65,9 @@ async function triggerInboundCheck(env) {
     await Promise.all(promises);
 
     // 只有测出来的活 IP 大于 0 组时才去写库，防止偶尔的网络波动把原本健康的 KV 数据库清空
-    if (validArray.length > 0) {
-      await env.CF_IP_POOL.put("VALID_IPS", validArray.join('\n'));
+if (validArray.length > 0) {
+  await env.IP_POOL.put("VALID_IPS", validArray.join('\n'));
+}
     }
   } catch (err) {
     console.error("后台异步抓取清洗失败:", err);
