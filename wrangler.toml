@@ -2,6 +2,8 @@
 name = "best"
 compatibility_date = "2026-05-18"
 
+directory = "."
+
 # 核心：在这里直接用代码声明 KV 绑定
 [[kv_namespaces]]
 binding = "CF_IP_POOL"
