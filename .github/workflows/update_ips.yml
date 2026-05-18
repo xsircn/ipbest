@@ -1,0 +1,41 @@
+name: 自动更新 Cloudflare 中国优选 IP 和端口
+
+on:
+  schedule:
+    - cron: '0 */3 * * *' # 每 3 小时自动执行一次
+  workflow_dispatch: # 允许你手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 签出代码
+      uses: actions/checkout@v4
+
+    - name: 抓取并格式化优选 IP 和端口
+      run: |
+        mkdir -p dist
+        
+        # 1. 抓取针对中国大陆（三网）优化过的官方最优边缘 IP 库
+        curl -s "https://ipdb.api.030101.xyz/?type=bestcf" > raw_ips.txt
+        
+        # 2. 清空或初始化最终的输出文件
+        > dist/ip_ports.txt
+        
+        # 3. 循环读取 IP 并拼接端口（此处以 443 和 8443 为例，你可以根据需求增删端口）
+        while read -r ip; do
+          if [ ! -z "$ip" ]; then
+            # 拼接 443 端口
+            echo "${ip}:443" >> dist/ip_ports.txt
+            # 拼接 8443 端口（Cloudflare 另一个常用的 HTTPS 端口）
+            echo "${ip}:8443" >> dist/ip_ports.txt
+          fi
+        done < raw_ips.txt
+        
+        echo "格式化完成，已生成含有端口的 IP 列表。"
+
+    - name: 发布到 GitHub Pages 分支
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: dist
+        branch: gh-pages # 结果将自动放入 gh-pages 分支中
