@@ -2,7 +2,7 @@ name: 自动更新 Cloudflare 中国优选 IP 和端口
 
 on:
   schedule:
-    - cron: '0 */3 * * *' # 每 3 小时自动执行一次
+    - cron: '0 */23 * * *' # 每23 小时自动执行一次
   workflow_dispatch: # 允许你手动点击按钮触发
 
 jobs:
